@@ -14,7 +14,7 @@ class CategoryData {
   factory CategoryData.fromJson(Map<String, dynamic> json) {
     return CategoryData(
       id: json['id'],
-      title: json['title'] ?? json['name'], // suporte para "name" ou "title"
+      title: json['title'] ?? json['name'], 
       recipes: (json['recipes'] as List)
           .map((item) => RecipeData.fromJson(item))
           .toList(),

@@ -3,12 +3,13 @@ import '../components/bottom_nav_bar.dart';
 import '../services/api_service.dart';
 import '../models/category_data.dart';
 import '../models/recipe_data.dart';
+import '../screens/category_detail_screen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key}); // ✅ Corrigido aqui
+  const HomeScreen({super.key}); 
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState(); // ✅ Corrigido aqui
+  State<HomeScreen> createState() => _HomeScreenState(); 
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -39,11 +40,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 return const Center(child: Text('Nenhuma receita encontrada'));
               } else {
                 return ListView(
+                  physics: const SlowScrollPhysics(), 
                   children: snapshot.data!
                       .map((category) => CategorySection(category: category))
                       .toList(),
                 );
-              }
+                              }
             },
           ),
         ),
@@ -60,11 +62,23 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+class SlowScrollPhysics extends ClampingScrollPhysics {
+  const SlowScrollPhysics({ScrollPhysics? parent}) : super(parent: parent);
 
+  @override
+  SlowScrollPhysics applyTo(ScrollPhysics? ancestor) {
+    return SlowScrollPhysics(parent: buildParent(ancestor));
+  }
+
+  @override
+  double applyPhysicsToUserOffset(ScrollMetrics position, double offset) {
+    return offset * 0.2; 
+  }
+}
 class CategorySection extends StatelessWidget {
   final CategoryData category;
 
-  const CategorySection({super.key, required this.category}); // ✅ Boa prática
+  const CategorySection({super.key, required this.category}); 
 
   @override
   Widget build(BuildContext context) {
@@ -80,7 +94,12 @@ class CategorySection extends StatelessWidget {
             ),
             TextButton(
               onPressed: () {
-                // TODO: Navegar para a tela da categoria
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CategoryDetailScreen(category: category),
+                  ),
+                );
               },
               child: const Text('Ver mais'),
             ),
@@ -102,65 +121,95 @@ class CategorySection extends StatelessWidget {
     );
   }
 
-  Widget _buildRecipeCard(RecipeData recipe) {
-    return Container(
-      width: 160,
-      margin: const EdgeInsets.only(right: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ClipRRect(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              child: recipe.imageUrl != null
-                  ? Image.network(
-                      recipe.imageUrl!,
-                      height: 120,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Image.asset(
-                        'assets/images/default_recipe.png',
-                        height: 120,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      ),
-                    )
-                  : Image.asset(
+Widget _buildRecipeCard(RecipeData recipe) {
+  return Container(
+    width: 160,
+    margin: const EdgeInsets.symmetric(horizontal: 8),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 4)],
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Imagem
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: recipe.imageUrl != null
+                ? Image.network(
+                    recipe.imageUrl!,
+                    height: 130,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Image.asset(
                       'assets/images/default_recipe.png',
-                      height: 120,
+                      height: 130,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     ),
-            ),
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(recipe.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('por ${recipe.author}', style: TextStyle(color: Colors.grey[700], fontSize: 12)),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
+                  )
+                : Image.asset(
+                    'assets/images/default_recipe.png',
+                    height: 130,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                  ),
+          ),
+        ),
+
+        Padding(
+          padding: const EdgeInsets.fromLTRB(10, 0, 10, 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                recipe.title,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  color: Color(0xFF272D2F),
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      'por ${recipe.author}',
+                      style: TextStyle(
+                        color: Colors.grey[700],
+                        fontSize: 12,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  IconButton(
                     icon: Icon(
                       recipe.isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: Colors.red,
+                      color: Color(0xFFFE724C),
+                      size: 20,
                     ),
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                     onPressed: () {
                       // TODO: Implementar favoritar receita
                     },
                   ),
-                )
-              ],
-            ),
+                ],
+              ),
+            ],
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
 }

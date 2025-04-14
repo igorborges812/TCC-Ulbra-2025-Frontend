@@ -6,7 +6,7 @@ import 'services/auth_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bool loggedIn = await AuthService().isLoggedIn(); // Verifica se o usuário está logado
+  bool loggedIn = await AuthService().isLoggedIn();
   runApp(MyApp(isLoggedIn: loggedIn));
 }
 
@@ -20,13 +20,13 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'CookTogether',
       theme: ThemeData(
-        primaryColor: Color(0xFFFE724C), // Cor principal do app
-        scaffoldBackgroundColor: Color(0xFFF2F2F2), // Fundo do app
+        primaryColor: Color(0xFFFE724C), 
+        scaffoldBackgroundColor: Color(0xFFF2F2F2), 
         textTheme: TextTheme(
-          bodyMedium: TextStyle(color: Color(0xFF272D2F)), // Cor do texto
+          bodyMedium: TextStyle(color: Color(0xFF272D2F)), 
         ),
       ),
-      home: HomeScreen(), // Define WelcomeScreen como primeira tela
+      home: WelcomeScreen(), // Define WelcomeScreen como primeira tela
       routes: {
         '/login': (context) => LoginScreen(),
         '/home': (context) => HomeScreen(),

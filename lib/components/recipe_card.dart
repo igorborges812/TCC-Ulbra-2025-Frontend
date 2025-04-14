@@ -5,6 +5,7 @@ class RecipeCard extends StatelessWidget {
   final String title;
   final String author;
   final VoidCallback onFavorite;
+  final bool isFavorite;
 
   const RecipeCard({
     Key? key,
@@ -12,13 +13,14 @@ class RecipeCard extends StatelessWidget {
     required this.title,
     required this.author,
     required this.onFavorite,
+    required this.isFavorite,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: 180,
-      margin: EdgeInsets.only(right: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 8), 
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -57,7 +59,7 @@ class RecipeCard extends StatelessWidget {
                 // Título
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Color(0xFF272D2F),
@@ -65,24 +67,28 @@ class RecipeCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 4),
-                // Autor
-                Text(
-                  "por $author",
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[700],
-                  ),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "por $author",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[700],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isFavorite ? Icons.favorite : Icons.favorite_border,
+                        color: Color(0xFFFE724C),
+                      ),
+                      onPressed: onFavorite,
+                      padding: EdgeInsets.zero,
+                      constraints: BoxConstraints(),
+                    )
+                  ],
                 ),
-                SizedBox(height: 8),
-                // Botão de favorito
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: IconButton(
-                    icon: Icon(Icons.favorite_border, color: Color(0xFFFE724C)),
-                    onPressed: onFavorite,
-                  ),
-                )
               ],
             ),
           )

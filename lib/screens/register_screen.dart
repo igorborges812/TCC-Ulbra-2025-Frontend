@@ -8,6 +8,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool isLoading = false;
@@ -23,10 +24,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => isLoading = true);
 
-    final email = emailController.text;
-    final password = passwordController.text;
+    final username = usernameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-    final success = await AuthService().register(email, password);
+    final success = await AuthService().register(email, password, username);
 
     if (success) {
       Navigator.pushReplacement(
@@ -64,6 +66,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 SizedBox(height: 30),
+                _buildTextField('Nome de usuário', usernameController),
+                SizedBox(height: 15),
                 _buildTextField('Email', emailController),
                 SizedBox(height: 15),
                 _buildTextField('Senha', passwordController, isPassword: true),
