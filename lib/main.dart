@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
           bodyMedium: TextStyle(color: Color(0xFF272D2F)),
         ),
       ),
-      home: HomeScreen(),
+      home: WelcomeScreen(),
       routes: {
         '/login': (context) => LoginScreen(),
         '/home': (context) => HomeScreen(),

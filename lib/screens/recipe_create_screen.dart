@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RecipeCreateScreen extends StatefulWidget {
   @override
@@ -31,18 +32,38 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
     addStep();
   }
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    print('Token recuperado: $token'); // Ajuda a debuggar
+    return token;
+  }
+
   Future<void> fetchCategories() async {
+    final token = await getToken();
+
+    if (token == null) {
+      print('Token não encontrado. Usuário não autenticado.');
+      return;
+    }
+
     final response = await http.get(
       Uri.parse('$baseUrl/category/'),
-      headers: {"Accept-Charset": "utf-8"},
+      headers: {
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
+
+    print('Resposta categorias: ${response.statusCode}');
+
     if (response.statusCode == 200) {
       final decodedBody = utf8.decode(response.bodyBytes);
       setState(() {
         categories = List<Map<String, dynamic>>.from(json.decode(decodedBody));
       });
     } else {
-      print('Erro ao carregar categorias');
+      print('Erro ao carregar categorias: ${response.body}');
     }
   }
 
@@ -80,8 +101,23 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
 
+      final token = await getToken();
+      if (token == null) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Token não encontrado. Faça login novamente.')),
+        );
+        return;
+      }
+
       var uri = Uri.parse('$baseUrl/create/');
       var request = http.MultipartRequest('POST', uri);
+
+      request.headers.addAll({
+        "Accept": "application/json",
+        "Authorization": "Bearer $token",
+      });
+
       request.fields['title'] = title;
       request.fields['category'] = selectedCategoryId.toString();
       request.fields['ingredients'] = jsonEncode(ingredients);
@@ -91,8 +127,10 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
         request.files.add(await http.MultipartFile.fromPath('image', imageFile!.path));
       }
 
-      final response = await request.send();
+      final streamedResponse = await request.send();
       Navigator.of(context).pop();
+
+      final response = await http.Response.fromStream(streamedResponse);
 
       if (response.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -100,6 +138,7 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
         );
         Navigator.of(context).pushReplacementNamed('/home');
       } else {
+        print('Erro ao criar receita: ${response.body}');
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Erro ao criar receita.')),
         );
