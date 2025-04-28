@@ -1,6 +1,9 @@
+// lib/components/recipe_card.dart
 import 'package:flutter/material.dart';
 
+
 class RecipeCard extends StatelessWidget {
+  final int recipeId;
   final String imageUrl;
   final String title;
   final String author;
@@ -9,6 +12,7 @@ class RecipeCard extends StatelessWidget {
 
   const RecipeCard({
     Key? key,
+    required this.recipeId,
     required this.imageUrl,
     required this.title,
     required this.author,
@@ -19,8 +23,7 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 180,
-      margin: const EdgeInsets.symmetric(horizontal: 8), 
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(18),
@@ -28,7 +31,7 @@ class RecipeCard extends StatelessWidget {
           BoxShadow(
             color: Colors.black12,
             blurRadius: 6,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
           )
         ],
       ),
@@ -37,19 +40,16 @@ class RecipeCard extends StatelessWidget {
         children: [
           // Imagem
           ClipRRect(
-            borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
-            child: Image.network(
-              imageUrl,
-              height: 120,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Container(
-                height: 120,
-                color: Colors.grey[300],
-                alignment: Alignment.center,
-                child: Icon(Icons.image, color: Colors.grey),
-              ),
-            ),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
+            child: imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    height: 120,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => _defaultImage(),
+                  )
+                : _defaultImage(),
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -81,11 +81,11 @@ class RecipeCard extends StatelessWidget {
                     IconButton(
                       icon: Icon(
                         isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: Color(0xFFFE724C),
+                        color: const Color(0xFFFE724C),
                       ),
                       onPressed: onFavorite,
                       padding: EdgeInsets.zero,
-                      constraints: BoxConstraints(),
+                      constraints: const BoxConstraints(),
                     )
                   ],
                 ),
@@ -94,6 +94,15 @@ class RecipeCard extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  Widget _defaultImage() {
+    return Image.asset(
+      'assets/images/default_recipe.png',
+      height: 120,
+      width: double.infinity,
+      fit: BoxFit.cover,
     );
   }
 }

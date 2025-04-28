@@ -16,7 +16,7 @@ class RecipeData {
 factory RecipeData.fromJson(Map<String, dynamic> json) {
   String? imageUrl = json['image'];
   if (imageUrl != null && !imageUrl.startsWith('http')) {
-    imageUrl = 'http://10.0.2.2:8000$imageUrl'; // ou seu IP real se estiver testando no físico
+    imageUrl = 'http://10.0.2.2:8000$imageUrl'; 
   }
 
   return RecipeData(

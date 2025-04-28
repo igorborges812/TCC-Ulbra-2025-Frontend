@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/category_data.dart';
+import '../models/recipe_detail.dart';
 
 class ApiService {
   final String baseUrl = 'http://10.0.2.2:8000';
@@ -25,10 +26,12 @@ class ApiService {
           final List<dynamic> recipesJson =
               json.decode(utf8.decode(recipesResponse.bodyBytes));
 
+          final limitedRecipes = recipesJson.take(2).toList();
+
           categories.add(CategoryData.fromJson({
             'id': categoryId,
             'title': categoryTitle,
-            'recipes': recipesJson,
+            'recipes': limitedRecipes,
           }));
         }
       }
@@ -36,6 +39,25 @@ class ApiService {
       return categories;
     } else {
       throw Exception('Erro ao buscar categorias');
+    }
+  }
+
+  Future<RecipeDetail?> fetchRecipeDetail(int id) async {
+    final url = Uri.parse('$baseUrl/api/recipes/recipe/id/$id/');
+    try {
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(utf8.decode(response.bodyBytes));
+        print('Receita carregada: $jsonData');
+        return RecipeDetail.fromJson(jsonData);
+      } else {
+        print('Erro: status ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('Erro ao buscar detalhes da receita: $e');
+      return null;
     }
   }
 }

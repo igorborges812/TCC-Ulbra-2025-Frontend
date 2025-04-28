@@ -28,7 +28,7 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(height: 10),
               SvgPicture.asset(
                 'assets/images/cozinheiro.svg',
-                height: MediaQuery.of(context).size.height * 0.4, // imagem grande
+                height: MediaQuery.of(context).size.height * 0.4, 
               ),
               SizedBox(height: 30),
               ElevatedButton(
@@ -60,7 +60,7 @@ class WelcomeScreen extends StatelessWidget {
                   'Já tem conta? Faça login',
                   style: TextStyle(
                     color: Color(0xFFF2F2F2),
-                    fontWeight: FontWeight.bold, // negrito
+                    fontWeight: FontWeight.bold, 
                   ),
                 ),
               ),
