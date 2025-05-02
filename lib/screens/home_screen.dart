@@ -1,4 +1,3 @@
-// lib/screens/home_screen.dart
 import 'package:flutter/material.dart';
 import '../components/bottom_nav_bar.dart';
 import '../services/api_service.dart';
@@ -22,6 +21,18 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     categoriesFuture = ApiService().fetchCategoriesWithRecipes();
+  }
+
+  void _onTabTapped(int index) {
+    if (index == 2) {
+      Navigator.pushNamed(context, '/create');
+    } else if (index == 3) {
+      Navigator.pushNamed(context, '/my_recipes');
+    } else {
+      setState(() {
+        _currentIndex = index;
+      });
+    }
   }
 
   @override
@@ -54,15 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       bottomNavigationBar: BottomNavBar(
         currentIndex: _currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            Navigator.pushNamed(context, '/create');
-          } else {
-            setState(() {
-              _currentIndex = index;
-            });
-          }
-        },
+        onTap: _onTabTapped,
       ),
     );
   }
@@ -89,7 +92,7 @@ class CategorySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final limitedRecipes = category.recipes.take(2).toList(); 
+    final limitedRecipes = category.recipes.take(2).toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,8 +151,6 @@ class CategorySection extends StatelessWidget {
                 imageUrl: recipe.imageUrl ?? '',
                 title: recipe.title,
                 author: recipe.author,
-                isFavorite: recipe.isFavorite,
-                onFavorite: () {},
               ),
             );
           },

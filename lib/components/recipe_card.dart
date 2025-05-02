@@ -1,14 +1,12 @@
-// lib/components/recipe_card.dart
 import 'package:flutter/material.dart';
-
+import 'package:provider/provider.dart';
+import '../providers/favorite_provider.dart';
 
 class RecipeCard extends StatelessWidget {
   final int recipeId;
   final String imageUrl;
   final String title;
   final String author;
-  final VoidCallback onFavorite;
-  final bool isFavorite;
 
   const RecipeCard({
     Key? key,
@@ -16,12 +14,18 @@ class RecipeCard extends StatelessWidget {
     required this.imageUrl,
     required this.title,
     required this.author,
-    required this.onFavorite,
-    required this.isFavorite,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final isFavorite = favoriteProvider.isFavorite(recipeId);
+
+    // Verifica se a URL já está completa ou precisa de base
+    final String fullImageUrl = imageUrl.startsWith('http')
+        ? imageUrl
+        : 'http://localhost:8000$imageUrl'; // altere aqui caso use outro host
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
       decoration: BoxDecoration(
@@ -38,12 +42,11 @@ class RecipeCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Imagem
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
             child: imageUrl.isNotEmpty
                 ? Image.network(
-                    imageUrl,
+                    fullImageUrl,
                     height: 120,
                     width: double.infinity,
                     fit: BoxFit.cover,
@@ -56,7 +59,6 @@ class RecipeCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Título
                 Text(
                   title,
                   style: const TextStyle(
@@ -83,7 +85,9 @@ class RecipeCard extends StatelessWidget {
                         isFavorite ? Icons.favorite : Icons.favorite_border,
                         color: const Color(0xFFFE724C),
                       ),
-                      onPressed: onFavorite,
+                      onPressed: () {
+                        favoriteProvider.toggleFavorite(recipeId);
+                      },
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),
                     )

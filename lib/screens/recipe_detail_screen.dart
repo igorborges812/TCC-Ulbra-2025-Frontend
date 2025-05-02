@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../models/recipe_detail.dart';
 import '../services/api_service.dart';
+import '../providers/favorite_provider.dart';
+import 'package:provider/provider.dart';
 
 class RecipeDetailScreen extends StatefulWidget {
   final int recipeId;
@@ -13,22 +15,18 @@ class RecipeDetailScreen extends StatefulWidget {
 
 class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   late Future<RecipeDetail?> _recipeDetail;
-  bool isFavorite = false;
 
   @override
   void initState() {
     super.initState();
     _recipeDetail = ApiService().fetchRecipeDetail(widget.recipeId);
-  }
-
-  void toggleFavorite() {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-  }
+  } 
 
   @override
   Widget build(BuildContext context) {
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final isFavorite = favoriteProvider.isFavorite(widget.recipeId);
+
     return Scaffold(
       body: FutureBuilder<RecipeDetail?>(
         future: _recipeDetail,
@@ -111,7 +109,9 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                                 color: isFavorite ? Colors.red : Colors.white,
                                 size: 28,
                               ),
-                              onPressed: toggleFavorite,
+                              onPressed: () {
+                                favoriteProvider.toggleFavorite(widget.recipeId);
+                              },
                             ),
                           ],
                         ),

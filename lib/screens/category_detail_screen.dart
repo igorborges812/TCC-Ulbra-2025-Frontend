@@ -1,4 +1,3 @@
-// lib/screens/category_detail_screen.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -46,16 +45,16 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       appBar: AppBar(
-        backgroundColor: const Color(0xFFFE724C), 
+        backgroundColor: const Color(0xFFFE724C),
         title: Text(
           widget.categoryTitle,
           style: const TextStyle(
-            color: Color(0xFF272D2F), 
+            color: Color(0xFF272D2F),
             fontWeight: FontWeight.bold,
           ),
         ),
         iconTheme: const IconThemeData(
-          color: Color(0xFF272D2F), 
+          color: Color(0xFF272D2F),
         ),
         elevation: 1,
       ),
@@ -95,8 +94,6 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                     imageUrl: recipe.imageUrl ?? '',
                     title: recipe.title,
                     author: recipe.author,
-                    isFavorite: recipe.isFavorite,
-                    onFavorite: () {},
                   ),
                 );
               },

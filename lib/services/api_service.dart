@@ -49,14 +49,11 @@ class ApiService {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(utf8.decode(response.bodyBytes));
-        print('Receita carregada: $jsonData');
         return RecipeDetail.fromJson(jsonData);
       } else {
-        print('Erro: status ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('Erro ao buscar detalhes da receita: $e');
       return null;
     }
   }

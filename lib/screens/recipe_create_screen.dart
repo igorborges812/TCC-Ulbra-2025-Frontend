@@ -24,6 +24,9 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
   final ImagePicker _picker = ImagePicker();
   final Color appColor = const Color(0xFFFE724C);
 
+  bool isCreatingNewCategory = false;
+  String newCategoryName = '';
+
   @override
   void initState() {
     super.initState();
@@ -35,7 +38,7 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
-    print('Token recuperado: $token'); // Ajuda a debuggar
+    print('Token recuperado: $token');
     return token;
   }
 
@@ -90,7 +93,7 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
 
   Future<void> submitForm() async {
     if (_formKey.currentState!.validate() &&
-        selectedCategoryId != null &&
+        (selectedCategoryId != null || isCreatingNewCategory) &&
         ingredients.isNotEmpty &&
         steps.isNotEmpty) {
       _formKey.currentState!.save();
@@ -119,7 +122,13 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
       });
 
       request.fields['title'] = title;
-      request.fields['category'] = selectedCategoryId.toString();
+
+      if (isCreatingNewCategory) {
+        request.fields['new_category'] = newCategoryName;
+      } else {
+        request.fields['category'] = selectedCategoryId.toString();
+      }
+
       request.fields['ingredients'] = jsonEncode(ingredients);
       request.fields['text_area'] = jsonEncode(steps);
 
@@ -191,24 +200,57 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
               const SizedBox(height: 16),
 
               const Text('Categoria'),
-              DropdownButtonFormField<int>(
-                value: selectedCategoryId,
-                items: categories.map((cat) {
-                  return DropdownMenuItem<int>(
-                    value: cat['id'],
-                    child: Text(cat['name']),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    selectedCategoryId = value;
-                  });
-                },
-                decoration: const InputDecoration(
-                  hintText: 'Selecione a categoria',
-                ),
-                validator: (value) => value == null ? 'Obrigatório' : null,
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<int>(
+                      value: selectedCategoryId,
+                      items: categories.map((cat) {
+                        return DropdownMenuItem<int>(
+                          value: cat['id'],
+                          child: Text(cat['name']),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          selectedCategoryId = value;
+                          isCreatingNewCategory = false;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        hintText: 'Selecione a categoria',
+                      ),
+                      validator: (_) {
+                        if (!isCreatingNewCategory && selectedCategoryId == null) {
+                          return 'Obrigatório';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isCreatingNewCategory = !isCreatingNewCategory;
+                        if (isCreatingNewCategory) selectedCategoryId = null;
+                      });
+                    },
+                    child: Text(isCreatingNewCategory ? 'Cancelar' : 'Nova'),
+                  ),
+                ],
               ),
+              if (isCreatingNewCategory)
+                TextFormField(
+                  decoration: const InputDecoration(labelText: 'Nova categoria'),
+                  onChanged: (val) => newCategoryName = val,
+                  validator: (value) {
+                    if (isCreatingNewCategory && (value == null || value.trim().isEmpty)) {
+                      return 'Obrigatório';
+                    }
+                    return null;
+                  },
+                ),
               const SizedBox(height: 16),
 
               const Text('Ingredientes', style: TextStyle(fontWeight: FontWeight.bold)),
