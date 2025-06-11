@@ -16,7 +16,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final prefs = await SharedPreferences.getInstance();
-  // await prefs.remove('token'); // ❌ Comentado: isso limpava o login ao iniciar
+  // await prefs.remove('token'); // 
 
   bool loggedIn = await AuthService().isLoggedIn();
 
