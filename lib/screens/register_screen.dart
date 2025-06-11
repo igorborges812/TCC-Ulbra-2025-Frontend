@@ -24,11 +24,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     setState(() => isLoading = true);
 
-    final username = usernameController.text.trim();
+    final nickname = usernameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text.trim();
 
-    final success = await AuthService().register(email, password, username);
+    final success = await AuthService().register(nickname, email, password);
 
     if (success) {
       Navigator.pushReplacement(

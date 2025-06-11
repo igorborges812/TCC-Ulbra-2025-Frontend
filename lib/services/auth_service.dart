@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8000/api'));
 
-
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
@@ -31,7 +30,7 @@ class AuthService {
     }
   }
 
-  Future<bool> register(String email, String password, String nickname) async {
+  Future<bool> register(String nickname, String email, String password) async {
     try {
       await _dio.post('/users/register/', data: {
         'email': email,
