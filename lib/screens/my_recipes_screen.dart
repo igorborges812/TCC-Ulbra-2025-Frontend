@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+import '../providers/favorite_provider.dart';
+import 'package:provider/provider.dart';
+import '../screens/recipe_detail_screen.dart';
 
 class MyRecipesScreen extends StatefulWidget {
   @override
@@ -25,6 +28,12 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('token');
+  }
+
+  String formatImageUrl(String? url) {
+    if (url == null || url.isEmpty) return '';
+    if (url.startsWith('http')) return url;
+    return 'http://10.0.2.2:8000$url';
   }
 
   Future<void> fetchMyRecipes() async {
@@ -67,42 +76,87 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
         favoritedRecipes = json.decode(decodedBody);
       });
     } else {
-      print('Erro ao buscar receitas favoritedas: ${response.body}');
+      print('Erro ao buscar receitas favoritadas: ${response.body}');
     }
   }
 
-  Widget buildRecipeCard(dynamic recipe) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 4,
-      child: InkWell(
-        onTap: () {
-          Navigator.pushNamed(context, '/recipe_detail', arguments: recipe['id']);
-        },
+  Widget buildRecipeCard(dynamic recipeData, BuildContext context, {bool isFavoriteTab = false}) {
+    final recipe = isFavoriteTab ? recipeData['recipe_id'] : recipeData;
+    final int id = recipe['id'];
+    final String title = recipe['title'] ?? '';
+    final String image = recipe['image'] ?? '';
+    final String author = recipe['user'] ?? 'Autor desconhecido';
+
+    final favoriteProvider = Provider.of<FavoriteProvider>(context);
+    final bool isFavorite = favoriteProvider.isFavorite(id);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => RecipeDetailScreen(recipeId: id)),
+        );
+      },
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 4,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
               borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-              child: recipe['image'] != null
+              child: image.isNotEmpty
                   ? Image.network(
-                      recipe['image'],
-                      height: 180,
+                      formatImageUrl(image),
+                      height: 120,
                       width: double.infinity,
                       fit: BoxFit.cover,
                     )
                   : Container(
-                      height: 180,
+                      height: 120,
                       color: Colors.grey[300],
                       child: const Center(child: Icon(Icons.image, size: 50)),
                     ),
             ),
             Padding(
-              padding: const EdgeInsets.all(12),
-              child: Text(
-                recipe['title'] ?? '',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.all(8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          'por $author',
+                          style: const TextStyle(fontSize: 11, color: Colors.grey),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isFavoriteTab)
+                        IconButton(
+                          icon: Icon(
+                            Icons.favorite,
+                            color: const Color(0xFFFE724C),
+                            size: 18,
+                          ),
+                          onPressed: () async {
+                            await favoriteProvider.toggleFavorite(id);
+                            setState(() {
+                              favoritedRecipes.removeWhere(
+                                  (item) => item['recipe_id']['id'] == id);
+                            });
+                          },
+                        ),
+                    ],
+                  ),
+                ],
               ),
             ),
           ],
@@ -138,27 +192,37 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Receitas criadas
           Padding(
             padding: const EdgeInsets.all(16),
             child: createdRecipes.isEmpty
                 ? const Center(child: Text('Nenhuma receita criada.'))
-                : ListView.builder(
+                : GridView.builder(
                     itemCount: createdRecipes.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.75,
+                    ),
                     itemBuilder: (context, index) {
-                      return buildRecipeCard(createdRecipes[index]);
+                      return buildRecipeCard(createdRecipes[index], context);
                     },
                   ),
           ),
-          // Receitas favoritedas
           Padding(
             padding: const EdgeInsets.all(16),
             child: favoritedRecipes.isEmpty
                 ? const Center(child: Text('Nenhuma receita favoritada.'))
-                : ListView.builder(
+                : GridView.builder(
                     itemCount: favoritedRecipes.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 12,
+                      crossAxisSpacing: 12,
+                      childAspectRatio: 0.75,
+                    ),
                     itemBuilder: (context, index) {
-                      return buildRecipeCard(favoritedRecipes[index]);
+                      return buildRecipeCard(favoritedRecipes[index], context, isFavoriteTab: true);
                     },
                   ),
           ),

@@ -20,7 +20,12 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   void initState() {
     super.initState();
     _recipeDetail = ApiService().fetchRecipeDetail(widget.recipeId);
-  } 
+  }
+
+  String resolveImageUrl(String url) {
+    if (url.startsWith('http')) return url;
+    return 'http://localhost:8000$url';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +57,7 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
                     children: [
                       recipe.image.isNotEmpty
                           ? Image.network(
-                              recipe.image,
+                              resolveImageUrl(recipe.image),
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) {
                                 return Image.asset(

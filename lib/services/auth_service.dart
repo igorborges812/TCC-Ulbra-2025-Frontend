@@ -4,9 +4,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 class AuthService {
   final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8000/api'));
 
+
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
   Future<bool> isLoggedIn() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
+    final token = await getToken();
     return token != null;
   }
 
@@ -17,7 +22,7 @@ class AuthService {
         'password': password,
       });
 
-      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final prefs = await SharedPreferences.getInstance();
       await prefs.setString('token', response.data['access']);
       return response.data['access'];
     } catch (e) {

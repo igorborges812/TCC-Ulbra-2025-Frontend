@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import '../providers/favorite_provider.dart';
 
 class RecipeCard extends StatelessWidget {
@@ -19,12 +20,13 @@ class RecipeCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
-    final isFavorite = favoriteProvider.isFavorite(recipeId);
+    final bool isFavorite = favoriteProvider.isFavorite(recipeId);
 
-    // Verifica se a URL já está completa ou precisa de base
-    final String fullImageUrl = imageUrl.startsWith('http')
-        ? imageUrl
-        : 'http://localhost:8000$imageUrl'; // altere aqui caso use outro host
+    final String fullImageUrl = imageUrl.isNotEmpty
+        ? (imageUrl.startsWith('http')
+            ? imageUrl
+            : 'http://10.0.2.2:8000$imageUrl')
+        : '';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -44,15 +46,17 @@ class RecipeCard extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.vertical(top: Radius.circular(18)),
-            child: imageUrl.isNotEmpty
-                ? Image.network(
-                    fullImageUrl,
-                    height: 120,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => _defaultImage(),
-                  )
-                : _defaultImage(),
+            child: SizedBox(
+              height: 120,
+              width: double.infinity,
+              child: (fullImageUrl.isNotEmpty)
+                  ? Image.network(
+                      fullImageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => _defaultImage(),
+                    )
+                  : _defaultImage(),
+            ),
           ),
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -60,7 +64,7 @@ class RecipeCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  title,
+                  title.isNotEmpty ? title : 'Sem título',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -69,28 +73,41 @@ class RecipeCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      "por $author",
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[700],
+                    Expanded(
+                      child: Text(
+                        author.isNotEmpty ? "por $author" : "Autor desconhecido",
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
                       ),
                     ),
-                    IconButton(
-                      icon: Icon(
-                        isFavorite ? Icons.favorite : Icons.favorite_border,
-                        color: const Color(0xFFFE724C),
-                      ),
-                      onPressed: () {
-                        favoriteProvider.toggleFavorite(recipeId);
-                      },
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
-                    )
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.share, size: 18),
+                          onPressed: () {
+                            Share.share('Olha essa receita que encontrei no CookTogether: $title 🍽️');
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            isFavorite ? Icons.favorite : Icons.favorite_border,
+                            color: const Color(0xFFFE724C),
+                          ),
+                          onPressed: () {
+                            favoriteProvider.toggleFavorite(recipeId);
+                          },
+                          splashRadius: 18,
+                          constraints: const BoxConstraints(),
+                          padding: EdgeInsets.zero,
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ],
@@ -102,11 +119,14 @@ class RecipeCard extends StatelessWidget {
   }
 
   Widget _defaultImage() {
-    return Image.asset(
-      'assets/images/default_recipe.png',
-      height: 120,
-      width: double.infinity,
-      fit: BoxFit.cover,
+    return Container(
+      color: Colors.grey[200],
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_not_supported,
+        size: 50,
+        color: Colors.grey,
+      ),
     );
   }
 }
