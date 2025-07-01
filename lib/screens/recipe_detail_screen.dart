@@ -22,11 +22,6 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
     _recipeDetail = ApiService().fetchRecipeDetail(widget.recipeId);
   }
 
-  String resolveImageUrl(String url) {
-    if (url.startsWith('http')) return url;
-    return 'http://localhost:8000$url';
-  }
-
   @override
   Widget build(BuildContext context) {
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
@@ -45,162 +40,177 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
           }
 
           final recipe = snapshot.data!;
+          final String imageUrl = recipe.image.isNotEmpty
+              ? recipe.image
+              : 'https://sizovghaygzecxbgvqvb.supabase.co/storage/v1/object/public/receitas/recipe_images/default.png';
+
           return CustomScrollView(
             slivers: [
-              SliverAppBar(
-                pinned: true,
-                expandedHeight: 250,
-                backgroundColor: const Color(0xFFFE724C),
-                flexibleSpace: FlexibleSpaceBar(
-                  background: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      recipe.image.isNotEmpty
-                          ? Image.network(
-                              resolveImageUrl(recipe.image),
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.asset(
-                                  'assets/images/default_recipe.png',
-                                  fit: BoxFit.cover,
-                                );
-                              },
-                            )
-                          : Image.asset(
-                              'assets/images/default_recipe.png',
-                              fit: BoxFit.cover,
-                            ),
-                      Container(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 16,
-                        right: 16,
-                        bottom: 16,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  recipe.title,
-                                  style: const TextStyle(
-                                    fontSize: 24,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  recipe.author,
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                isFavorite ? Icons.favorite : Icons.favorite_border,
-                                color: isFavorite ? Colors.red : Colors.white,
-                                size: 28,
-                              ),
-                              onPressed: () {
-                                favoriteProvider.toggleFavorite(widget.recipeId);
-                              },
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Ingredientes',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (recipe.ingredients.isEmpty)
-                        const Text('Sem ingredientes cadastrados.')
-                      else
-                        ...recipe.ingredients.map((ingredient) {
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Text(
-                              ingredient,
-                              style: const TextStyle(fontSize: 16),
-                            ),
-                          );
-                        }).toList(),
-                      const SizedBox(height: 24),
-                      const Text(
-                        'Modo de Preparo',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      if (recipe.steps.isEmpty)
-                        const Text('Sem instruções de preparo cadastradas.')
-                      else
-                        ...recipe.steps.asMap().entries.map(
-                              (entry) => Container(
-                                margin: const EdgeInsets.symmetric(vertical: 8),
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                  ],
-                                ),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'PASSO ${entry.key + 1}',
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: Color(0xFFFE724C),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Text(entry.value),
-                                  ],
-                                ),
-                              ),
-                            ).toList(),
-                    ],
-                  ),
-                ),
-              ),
+              _buildSliverAppBar(imageUrl, recipe, isFavorite, favoriteProvider),
+              _buildRecipeContent(recipe),
             ],
           );
         },
+      ),
+    );
+  }
+
+  SliverAppBar _buildSliverAppBar(
+      String imageUrl, RecipeDetail recipe, bool isFavorite, FavoriteProvider favoriteProvider) {
+    return SliverAppBar(
+      pinned: true,
+      expandedHeight: 250,
+      backgroundColor: const Color(0xFFFE724C),
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[200],
+                  alignment: Alignment.center,
+                  child: const Icon(
+                    Icons.image_not_supported,
+                    size: 50,
+                    color: Colors.grey,
+                  ),
+                );
+              },
+            ),
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
+                ),
+              ),
+            ),
+            Positioned(
+              left: 16,
+              right: 16,
+              bottom: 16,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        recipe.title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        recipe.author,
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      isFavorite ? Icons.favorite : Icons.favorite_border,
+                      color: isFavorite ? Colors.red : Colors.white,
+                      size: 28,
+                    ),
+                    onPressed: () {
+                      favoriteProvider.toggleFavorite(widget.recipeId);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  SliverToBoxAdapter _buildRecipeContent(RecipeDetail recipe) {
+    return SliverToBoxAdapter(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildSectionTitle('Ingredientes'),
+            const SizedBox(height: 8),
+            if (recipe.ingredients.isEmpty)
+              const Text('Sem ingredientes cadastrados.')
+            else
+              ...recipe.ingredients.map(
+                (ingredient) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Text(
+                    ingredient,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
+            const SizedBox(height: 24),
+            _buildSectionTitle('Modo de Preparo'),
+            const SizedBox(height: 8),
+            if (recipe.steps.isEmpty)
+              const Text('Sem instruções de preparo cadastradas.')
+            else
+              ...recipe.steps.asMap().entries.map(
+                    (entry) => _buildStepCard(entry.key + 1, entry.value),
+                  ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget _buildStepCard(int stepNumber, String step) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.2),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'PASSO $stepNumber',
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Color(0xFFFE724C),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(step),
+        ],
       ),
     );
   }

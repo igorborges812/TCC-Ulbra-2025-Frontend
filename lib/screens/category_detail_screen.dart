@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
+
 import '../models/recipe_data.dart';
 import '../components/recipe_card.dart';
 import 'recipe_detail_screen.dart';
@@ -10,7 +12,6 @@ class CategoryDetailScreen extends StatefulWidget {
   final String categoryTitle;
 
   const CategoryDetailScreen({
-    super.key,
     required this.categoryId,
     required this.categoryTitle,
   });
@@ -21,6 +22,7 @@ class CategoryDetailScreen extends StatefulWidget {
 
 class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
   late Future<List<RecipeData>> _recipesFuture;
+  final String baseUrl = 'https://tcc-ulbra-2025-backend.onrender.com';
 
   @override
   void initState() {
@@ -28,9 +30,21 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
     _recipesFuture = fetchRecipesByCategory(widget.categoryId);
   }
 
+  Future<String?> getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token');
+  }
+
   Future<List<RecipeData>> fetchRecipesByCategory(int categoryId) async {
-    final url = Uri.parse('http://10.0.2.2:8000/api/recipes/category/$categoryId/');
-    final response = await http.get(url);
+    final token = await getToken();
+    final url = Uri.parse('$baseUrl/api/recipes/category/$categoryId/');
+    final response = await http.get(
+      url,
+      headers: {
+        'Accept': 'application/json',
+        if (token != null) 'Authorization': 'Bearer $token',
+      },
+    );
 
     if (response.statusCode == 200) {
       final List<dynamic> jsonData = json.decode(utf8.decode(response.bodyBytes));
@@ -91,7 +105,7 @@ class _CategoryDetailScreenState extends State<CategoryDetailScreen> {
                   },
                   child: RecipeCard(
                     recipeId: recipe.id,
-                    imageUrl: recipe.imageUrl ?? '',
+                    imageUrl: recipe.image ?? '',
                     title: recipe.title,
                     author: recipe.author,
                   ),

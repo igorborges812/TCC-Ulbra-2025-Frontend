@@ -1,3 +1,4 @@
+// [sem alterações nesta parte]
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -29,6 +30,8 @@ class _HomeScreenState extends State<HomeScreen> {
   bool _isSearching = false;
   int _currentIndex = 0;
 
+  final String baseUrl = 'https://tcc-ulbra-2025-backend.onrender.com/api';
+
   @override
   void initState() {
     super.initState();
@@ -57,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } else if (index == 3) {
       Navigator.pushNamed(context, '/my_recipes');
     } else if (index == 4) {
-      Navigator.pushNamed(context, '/profile'); // 🔁 vai para a tela de perfil
+      Navigator.pushNamed(context, '/profile');
     } else {
       setState(() {
         _currentIndex = index;
@@ -75,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final token = await AuthService().getToken();
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/recipes/category/'),
+      Uri.parse('$baseUrl/recipes/category/'),
       headers: {
         'Accept': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
@@ -105,7 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final token = await AuthService().getToken();
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/recipes/list/?search=$query'),
+      Uri.parse('$baseUrl/recipes/list/?search=$query'),
       headers: {
         'Accept': 'application/json',
         if (token != null) 'Authorization': 'Bearer $token',
@@ -315,7 +318,7 @@ class CategorySection extends StatelessWidget {
               },
               child: RecipeCard(
                 recipeId: recipe.id,
-                imageUrl: recipe.imageUrl ?? '',
+                imageUrl: recipe.image ?? '', // ✅ AJUSTE FEITO AQUI
                 title: recipe.title,
                 author: recipe.author,
               ),

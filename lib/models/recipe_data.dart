@@ -2,29 +2,24 @@ class RecipeData {
   final int id;
   final String title;
   final String author;
-  final String? imageUrl;
+  final String? image;
   final bool isFavorite;
 
   RecipeData({
     required this.id,
     required this.title,
     required this.author,
-    this.imageUrl,
+    this.image,
     required this.isFavorite,
   });
 
-factory RecipeData.fromJson(Map<String, dynamic> json) {
-  String? imageUrl = json['image'];
-  if (imageUrl != null && !imageUrl.startsWith('http')) {
-    imageUrl = 'http://10.0.2.2:8000$imageUrl'; 
+  factory RecipeData.fromJson(Map<String, dynamic> json) {
+    return RecipeData(
+      id: json['id'],
+      title: (json['title'] ?? 'Sem título').toString(),
+      author: (json['user'] ?? json['author'] ?? 'Autor desconhecido').toString(),
+      image: json['image'], // ✅ agora busca direto o campo "image"
+      isFavorite: json['is_favorite'] ?? false,
+    );
   }
-
-  return RecipeData(
-    id: json['id'],
-    title: (json['title'] ?? 'Sem título').toString(),
-    author: (json['user'] ?? json['author'] ?? 'Autor desconhecido').toString(),
-    imageUrl: imageUrl,
-    isFavorite: json['is_favorite'] ?? false,
-  );
-}
 }

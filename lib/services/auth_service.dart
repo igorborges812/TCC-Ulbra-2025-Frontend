@@ -2,7 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  final Dio _dio = Dio(BaseOptions(baseUrl: 'http://10.0.2.2:8000/api'));
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: 'https://tcc-ulbra-2025-backend.onrender.com/api',
+      headers: {'Content-Type': 'application/json'},
+    ),
+  );
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
@@ -21,9 +26,15 @@ class AuthService {
         'password': password,
       });
 
+      final accessToken = response.data['access'];
+
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', response.data['access']);
-      return response.data['access'];
+      await prefs.setString('token', accessToken);
+
+      // Atualiza o header global do Dio com o token para chamadas futuras
+      _dio.options.headers['Authorization'] = 'Bearer $accessToken';
+
+      return accessToken;
     } catch (e) {
       print('Erro no login: $e');
       return null;

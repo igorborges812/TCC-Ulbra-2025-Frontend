@@ -17,6 +17,8 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
   List<dynamic> favoritedRecipes = [];
   final Color appColor = const Color(0xFFFE724C);
 
+  final String baseUrl = 'https://tcc-ulbra-2025-backend.onrender.com';
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +35,7 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
   String formatImageUrl(String? url) {
     if (url == null || url.isEmpty) return '';
     if (url.startsWith('http')) return url;
-    return 'http://10.0.2.2:8000$url';
+    return '$baseUrl$url';
   }
 
   Future<void> fetchMyRecipes() async {
@@ -41,7 +43,7 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/recipes/my_recipes/'),
+      Uri.parse('$baseUrl/api/recipes/my_recipes/'),
       headers: {
         "Accept": "application/json",
         "Authorization": "Bearer $token",
@@ -63,7 +65,7 @@ class _MyRecipesScreenState extends State<MyRecipesScreen> with SingleTickerProv
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/favorites/list/'),
+      Uri.parse('$baseUrl/api/favorites/list/'),
       headers: {
         "Accept": "application/json",
         "Authorization": "Bearer $token",

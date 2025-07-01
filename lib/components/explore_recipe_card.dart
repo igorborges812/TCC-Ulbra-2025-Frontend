@@ -26,7 +26,7 @@ class ExploreRecipeCard extends StatelessWidget {
     final String fullImageUrl = imageUrl.isNotEmpty
         ? (imageUrl.startsWith('http')
             ? imageUrl
-            : 'http://10.0.2.2:8000$imageUrl')
+            : 'https://sizovghaygzecxbgvqvb.supabase.co/storage/v1/object/public/receitas/$imageUrl')
         : '';
 
     return GestureDetector(
@@ -48,7 +48,7 @@ class ExploreRecipeCard extends StatelessWidget {
               color: Colors.black12,
               blurRadius: 5,
               offset: const Offset(0, 3),
-            )
+            ),
           ],
         ),
         child: Column(
@@ -69,7 +69,7 @@ class ExploreRecipeCard extends StatelessWidget {
               ),
             ),
             Padding(
-              padding: const EdgeInsets.all(10.0),
+              padding: const EdgeInsets.all(10),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -102,7 +102,9 @@ class ExploreRecipeCard extends StatelessWidget {
                           IconButton(
                             icon: const Icon(Icons.share, size: 18),
                             onPressed: () {
-                              Share.share('Olha essa receita que encontrei no CookTogether: $title 🍽️');
+                              Share.share(
+                                'Veja essa receita no CookTogether: "$title"! 🍽️',
+                              );
                             },
                           ),
                           IconButton(
@@ -114,6 +116,9 @@ class ExploreRecipeCard extends StatelessWidget {
                             onPressed: () {
                               favoriteProvider.toggleFavorite(recipeId);
                             },
+                            splashRadius: 18,
+                            constraints: const BoxConstraints(),
+                            padding: EdgeInsets.zero,
                           ),
                         ],
                       ),
@@ -121,7 +126,7 @@ class ExploreRecipeCard extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       ),

@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../services/auth_service.dart';
-import 'login_screen.dart';
+import 'welcome_screen.dart'; // 👈 novo import
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -23,6 +23,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _loading = false;
   String _message = '';
 
+  final String baseUrl = 'https://tcc-ulbra-2025-backend.onrender.com';
+
   @override
   void initState() {
     super.initState();
@@ -34,7 +36,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (token == null) return;
 
     final response = await http.get(
-      Uri.parse('http://10.0.2.2:8000/api/users/edit/'),
+      Uri.parse('$baseUrl/api/users/edit/'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -78,7 +80,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
 
     final response = await http.put(
-      Uri.parse('http://10.0.2.2:8000/api/users/edit/'),
+      Uri.parse('$baseUrl/api/users/edit/'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
@@ -103,7 +105,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        MaterialPageRoute(builder: (context) => WelcomeScreen()), // 👈 redireciona para Welcome
         (route) => false,
       );
     }
@@ -114,7 +116,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (token == null) return;
 
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8000/api/users/deactivate/'),
+      Uri.parse('$baseUrl/api/users/deactivate/'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',

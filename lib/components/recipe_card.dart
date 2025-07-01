@@ -22,11 +22,9 @@ class RecipeCard extends StatelessWidget {
     final favoriteProvider = Provider.of<FavoriteProvider>(context);
     final bool isFavorite = favoriteProvider.isFavorite(recipeId);
 
-    final String fullImageUrl = imageUrl.isNotEmpty
-        ? (imageUrl.startsWith('http')
-            ? imageUrl
-            : 'http://10.0.2.2:8000$imageUrl')
-        : '';
+    final String finalImageUrl = imageUrl.isNotEmpty
+        ? imageUrl
+        : 'https://sizovghaygzecxbgvqvb.supabase.co/storage/v1/object/public/receitas/recipe_images/default.png';
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -49,17 +47,15 @@ class RecipeCard extends StatelessWidget {
             child: SizedBox(
               height: 120,
               width: double.infinity,
-              child: (fullImageUrl.isNotEmpty)
-                  ? Image.network(
-                      fullImageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => _defaultImage(),
-                    )
-                  : _defaultImage(),
+              child: Image.network(
+                finalImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => _defaultImage(),
+              ),
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -84,6 +80,7 @@ class RecipeCard extends StatelessWidget {
                           fontSize: 12,
                           color: Colors.grey[700],
                         ),
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                     Row(
@@ -91,7 +88,10 @@ class RecipeCard extends StatelessWidget {
                         IconButton(
                           icon: const Icon(Icons.share, size: 18),
                           onPressed: () {
-                            Share.share('Olha essa receita que encontrei no CookTogether: $title 🍽️');
+                            Share.share(
+                              'Confira essa receita no CookTogether: "$title"! 🍽️',
+                              subject: 'Receita do CookTogether',
+                            );
                           },
                         ),
                         IconButton(
@@ -112,7 +112,7 @@ class RecipeCard extends StatelessWidget {
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );

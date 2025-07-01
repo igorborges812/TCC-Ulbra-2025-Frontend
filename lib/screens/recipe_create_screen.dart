@@ -12,7 +12,7 @@ class RecipeCreateScreen extends StatefulWidget {
 
 class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  final String baseUrl = 'http://10.0.2.2:8000/api/recipes';
+  final String baseUrl = 'https://tcc-ulbra-2025-backend.onrender.com/api/recipes';
 
   String title = '';
   int? selectedCategoryId;
@@ -37,18 +37,12 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
 
   Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('token');
-    print('Token recuperado: $token');
-    return token;
+    return prefs.getString('token');
   }
 
   Future<void> fetchCategories() async {
     final token = await getToken();
-
-    if (token == null) {
-      print('Token não encontrado. Usuário não autenticado.');
-      return;
-    }
+    if (token == null) return;
 
     final response = await http.get(
       Uri.parse('$baseUrl/category/'),
@@ -58,15 +52,11 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
       },
     );
 
-    print('Resposta categorias: ${response.statusCode}');
-
     if (response.statusCode == 200) {
       final decodedBody = utf8.decode(response.bodyBytes);
       setState(() {
         categories = List<Map<String, dynamic>>.from(json.decode(decodedBody));
       });
-    } else {
-      print('Erro ao carregar categorias: ${response.body}');
     }
   }
 
@@ -132,8 +122,11 @@ class _RecipeCreateScreenState extends State<RecipeCreateScreen> {
       request.fields['ingredients'] = jsonEncode(ingredients);
       request.fields['text_area'] = jsonEncode(steps);
 
+      // Envio correto da imagem como arquivo
       if (imageFile != null) {
-        request.files.add(await http.MultipartFile.fromPath('image', imageFile!.path));
+        request.files.add(
+          await http.MultipartFile.fromPath('image', imageFile!.path),
+        );
       }
 
       final streamedResponse = await request.send();
