@@ -23,11 +23,13 @@
                 android:resource="@style/NormalTheme" />
 
             <!-- Deep link para reset de senha -->
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="com.cooktogether" android:host="reset" />
+                <data
+                    android:scheme="cooktogether"
+                    android:host="reset" />
             </intent-filter>
 
             <!-- Atividade principal -->
