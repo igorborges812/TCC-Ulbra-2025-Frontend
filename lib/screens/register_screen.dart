@@ -108,28 +108,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         child: Text('Criar conta', style: TextStyle(fontSize: 18)),
                       ),
-                SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: Colors.white)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text("Ou continue com", style: TextStyle(color: Color(0xFFF2F2F2))),
-                    ),
-                    Expanded(child: Divider(color: Colors.white)),
-                  ],
-                ),
-                SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildSocialIcon('assets/icons/google.png'),
-                    SizedBox(width: 15),
-                    _buildSocialIcon('assets/icons/apple.png'),
-                    SizedBox(width: 15),
-                    _buildSocialIcon('assets/icons/facebook.png'),
-                  ],
-                ),
                 SizedBox(height: 30),
                 GestureDetector(
                   onTap: () => Navigator.push(
@@ -172,14 +150,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           borderRadius: BorderRadius.circular(12),
         ),
       ),
-    );
-  }
-
-  Widget _buildSocialIcon(String path) {
-    return CircleAvatar(
-      backgroundColor: Colors.white,
-      radius: 22,
-      child: Image.asset(path, width: 22),
     );
   }
 }
